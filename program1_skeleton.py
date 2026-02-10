@@ -10,16 +10,22 @@ from socket import *
 import sys # In order to terminate the program
 
 def quitFTP(clientSocket):
-    # COMPLETE
+    command = "QUIT" + "\r\n"
     dataOut = command.encode("utf-8")
     clientSocket.sendall(dataOut)
     dataIn = clientSocket.recv(1024)
     data = dataIn.decode("utf-8")
     print(data)
+    if data.startswith("221"):
+        print("Success")
+    else:
+        print("Failed")
 
 def sendCommand(socket, command):
     dataOut = command.encode("utf-8")
-    # Complete
+    socket.sendall(dataOut)
+    dataIn = socket.recv(1024)
+    data = dataIn.decode("utf-8")
     return data
 
 
