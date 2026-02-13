@@ -39,11 +39,17 @@ def receiveData(clientSocket):
 # You will not be penalized if you don't
 def modePASV(clientSocket):
     command = "PASV" + "\r\n"
-    # Complete
+    dataSocket = socket(AF_INET, SOCK_STREAM)
+    data = sendCommand(clientSocket, command)
     status = 0
     if data.startswith(""):
         status = 227
-        # Complete
+        start = data.find("(")
+        end = data.find(")")
+        numbers = data[start+1:end].split(",")
+
+        ip = ".".join(numbers[0:4])
+        port = int(numbers[4]) * 256 + int(numbers[5])
         dataSocket.connect((ip, port))
         
     return status, dataSocket
@@ -86,10 +92,10 @@ def main():
        
     if status == 230:
         # It is your choice whether to use ACTIVE or PASV mode. In any event:
-        # COMPLETE
+        print("Success")
         pasvStatus, dataSocket = modePASV(clientSocket)
         if pasvStatus == 227:
-            # COMPLETE
+        print("Entering Passive Mode")
     
     print("Disconnecting...")
     
