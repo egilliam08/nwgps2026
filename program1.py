@@ -159,18 +159,30 @@ def main():
                 if len(parts) < 2:
                     print("Usage: put local-file")
                 else:
-                    status, dataSocket = modePASV(clientSocket)
-                    if status == 227:
-                        sendCommand(clientSocket, "STOR " + parts[1] + "\r\n")
-                        with open(parts[1], 'rb') as f:
-                            while True:
-                                data = f.read(4096)
-                                if not data:
-                                    break
-                                dataSocket.sendall(data)
-                        dataSocket.close()
-                        receiveData(clientSocket)
-                        print("Success\n")
+                    # Check if file exists first (before creating PASV connection)
+                    try:
+                        testFile = open(parts[1], 'rb')
+                        testFile.close()
+                    except FileNotFoundError:
+                        print("Failed: Local file not found\n")
+                    except:
+                        print("Failed\n")
+                    else:
+                        # File exists, proceed with upload
+                        status, dataSocket = modePASV(clientSocket)
+                        if status == 227:
+                            sendCommand(clientSocket, "STOR " + parts[1] + "\r\n")
+                            with open(parts[1], 'rb') as f:
+                                while True:
+                                    data = f.read(4096)
+                                    if not data:
+                                        break
+                                    dataSocket.sendall(data)
+                            dataSocket.close()
+                            receiveData(clientSocket)
+                            print("Success\n")
+                        else:
+                            print("Failed\n")
 
             elif cmd == "delete":
                 # Delete file
