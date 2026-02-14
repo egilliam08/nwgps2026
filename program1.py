@@ -136,7 +136,7 @@ def main():
                     print("Usage: cd remote-dir")
                 else:
                     response = sendCommand(clientSocket, "CWD " + parts[1] + "\r\n")
-                    print(response)
+                    print(response.rstrip())
                     if response.startswith("250"):
                         print("Success\n")
                     else:
