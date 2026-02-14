@@ -127,6 +127,8 @@ def main():
                     receiveData(clientSocket)
                     print(fileList.rstrip())
                     print("Success\n")
+                else:
+                    print("Failed\n")
 
             elif cmd == "cd":
                 # Change directory 
@@ -135,6 +137,10 @@ def main():
                 else:
                     response = sendCommand(clientSocket, "CWD " + parts[1] + "\r\n")
                     print(response)
+                    if response.startswith("250"):
+                        print("Success\n")
+                    else:
+                        print("Failed\n")
 
             elif cmd == "get":
                 # Get file
@@ -143,6 +149,7 @@ def main():
                 else:
                     status, dataSocket = modePASV(clientSocket)
                     if status == 227:
+                        bytesTransferred = 0
                         sendCommand(clientSocket, "RETR " + parts[1] + "\r\n")
                         with open(parts[1], 'wb') as f:
                             while True:
@@ -150,9 +157,12 @@ def main():
                                 if not data:
                                     break
                                 f.write(data)
+                                bytesTransferred += len(data)
                         dataSocket.close()
                         receiveData(clientSocket)
-                        print("Success\n")
+                        print(f"Success: {bytesTransferred} bytes transferred\n")
+                    else:
+                        print("Failed\n")
 
             elif cmd == "put":
                 # Put file
@@ -171,6 +181,7 @@ def main():
                         # File exists, proceed with upload
                         status, dataSocket = modePASV(clientSocket)
                         if status == 227:
+                            bytesTransferred = 0
                             sendCommand(clientSocket, "STOR " + parts[1] + "\r\n")
                             with open(parts[1], 'rb') as f:
                                 while True:
@@ -178,9 +189,10 @@ def main():
                                     if not data:
                                         break
                                     dataSocket.sendall(data)
+                                    bytesTransferred += len(data)
                             dataSocket.close()
                             receiveData(clientSocket)
-                            print("Success\n")
+                            print(f"Success: {bytesTransferred} bytes transferred\n")
                         else:
                             print("Failed\n")
 
