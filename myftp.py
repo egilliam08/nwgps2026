@@ -142,25 +142,29 @@ def main():
                     else:
                         print("Failed\n")
 
-            elif cmd == "get":
+                        elif cmd == "get":
                 # Get file
                 if len(parts) < 2:
                     print("Usage: get remote-file")
                 else:
                     status, dataSocket = modePASV(clientSocket)
                     if status == 227:
-                        bytesTransferred = 0
-                        sendCommand(clientSocket, "RETR " + parts[1] + "\r\n")
-                        with open(parts[1], 'wb') as f:
-                            while True:
-                                data = dataSocket.recv(4096)
-                                if not data:
-                                    break
-                                f.write(data)
-                                bytesTransferred += len(data)
-                        dataSocket.close()
-                        receiveData(clientSocket)
-                        print(f"Success: {bytesTransferred} bytes transferred\n")
+                        response = sendCommand(clientSocket, "RETR " + parts[1] + "\r\n")
+                        if response.startswith("150") or response.startswith("125"):
+                            bytesTransferred = 0
+                            with open(parts[1], 'wb') as f:
+                                while True:
+                                    data = dataSocket.recv(4096)
+                                    if not data:
+                                        break
+                                    f.write(data)
+                                    bytesTransferred += len(data)
+                            dataSocket.close()
+                            receiveData(clientSocket)
+                            print(f"Success: {bytesTransferred} bytes transferred\n")
+                        else:
+                            dataSocket.close()
+                            print("Failed\n")
                     else:
                         print("Failed\n")
 
